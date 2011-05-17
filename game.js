@@ -16,12 +16,31 @@ var KEYS = {
 	UP: 38,
 	DOWN: 40,
 	ACTION1: 32,
-	PAUSE: 80
+	PAUSE: 80,
+	NEW: 78,
+	RESTART: 82
 };
+
+var PIECES = [
+	// L
+	{color: '#f00', blocks: [{x: 0, y: 0}, {x: 0, y: 1}, {x: 0, y: 2}, {x: 1, y: 2}]},
+	// L invertido
+	{color: '#ff0', blocks: [{x: 1, y: 0}, {x: 1, y: 1}, {x: 1, y: 2}, {x: 0, y: 2}]},
+
+	// ----
+	{color: '#00f', blocks: [{x: 0, y: 1}, {x: 0, y: 2}, {x: 0, y: 3}, {x: 0, y: 4}]},
+	
+	// |-
+	{color: '#ff0', blocks: [{x: 0, y: 1}, {x: 1, y: 0}, {x: 1, y: 1}, {x: 2, y: 1}]}
+];
+
+
+
 
 function Piece(op) {
 	var self = this;
-	this.blocks = [];
+	this.blocks = op && op.blocks;
+	this.color = op && op.color;
 	this.x = 0;
 	this.y = 0;
 	this.active = false;
@@ -86,31 +105,18 @@ function drawBlock (op, cx) {
 }
 
 
-var p1 = new Piece();
-p1.blocks = [{x: 0, y: 0}, {x: 0, y: 1}, {x: 0, y: 2}, {x: 1, y: 2}];
-p1.color = '#f00';
-p1.active = true;
+function spawnPiece () {
+	var randomPiece = Math.floor(Math.random() * PIECES.length);
+	var newPiece = new Piece( PIECES[randomPiece] );
+	
+	
+	return ACTIVE_PIECE = newPiece;
+}
 
-
-var p2 = new Piece();
-p2.blocks = [{x: 0, y: 1}, {x: 0, y: 2}, {x: 0, y: 3}, {x: 0, y: 4}];
-p2.color = '#00f';
-p2.x = 6;
-p2.y = 2;
-
-var p3 = new Piece();
-p3.blocks = [{x: 0, y: 1}, {x: 1, y: 0}, {x: 1, y: 1}, {x: 2, y: 1}];
-p3.color = '#ff0';
-p3.x = 8;
-p3.y = 8;
-
-drawPiece(p1);
-drawPiece(p2);
-drawPiece(p3);
-ACTIVE_PIECE = p1;
+ACTIVE_PIECE = spawnPiece();
 
 window.onkeydown = function(evt) {
-	// console.log(evt.which);
+	console.log(evt.which);
 	switch(evt.which){
 		case KEYS.LEFT:
 			evt.preventDefault();
@@ -124,6 +130,9 @@ window.onkeydown = function(evt) {
 			evt.preventDefault();
 			ACTIVE_PIECE.move({y: +1});
 		case KEYS.PAUSE:
+			evt.preventDefault();
+		case KEYS.NEW:
+			ACTIVE_PIECE = spawnPiece();
 	}
 };
 
