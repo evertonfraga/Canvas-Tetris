@@ -1,15 +1,10 @@
+var STAGE_DIMENSIONS = {width: 15, height: 20};
 var BLOCK_SIZE = 20;
-var GAMESPEED = 600;
-var GAMELOOP = null;
+var GAME_SPEED = 600;
+var GAME_LOOP = null;
 var ACTIVE_PIECE = null;
 var canvas = document.querySelectorAll('canvas')[0];
 var c = canvas.getContext('2d');
-var ORIENTATION = {
-	NORTH: 0,
-	WEST: 1,
-	SOUTH: 2,
-	EAST: 3
-};
 var KEYS = {
 	LEFT: 37,
 	RIGHT: 39,
@@ -49,13 +44,41 @@ function Piece(op) {
 	this.y = 0;
 	this.active = false;
 	
-	this.move = function (coords) {
+	this.move = function (moveTo) {
+		// console.log('leftMost: ' + this.leftMost(), 'rightMost: ' + this.rightMost());
+		if (moveTo.x < 0 && this.x + this.leftMost() == 0){
+			return this;
+		}
+		if (moveTo.x > 0 && this.x + this.rightMost() == STAGE_DIMENSIONS.width - 1){
+			return this;
+		}
+		moveTo.x = moveTo.x || 0;
+		moveTo.y = moveTo.y || 0;
 		clearArea(self, c);
-		coords.x = coords.x || 0;
-		coords.y = coords.y || 0;
-		this.x += coords.x;
-		this.y += coords.y;
+		this.x += moveTo.x;
+		this.y += moveTo.y;
 		drawPiece(self);
+		return this;
+	};
+	
+	this.leftMost = function () {
+		var min = null;
+		for (i in this.blocks){
+			if (this.blocks[i].x < min) { min = this.blocks[i].x; }
+		}
+		return this.x + min;
+	};
+	
+	this.rightMost = function () {
+		var max = null;
+		for (i in this.blocks){
+			if (this.blocks[i].x > max) { max = this.blocks[i].x; }
+		}
+		return this.x + max;
+	};
+	
+	this.rotate = function (orientation) {
+		return this;
 	};
 }
 
@@ -105,19 +128,18 @@ function drawBlock (op, cx) {
 	cx.fillRect(x + BLOCK_SIZE/4, y + BLOCK_SIZE/4, BLOCK_SIZE/2, BLOCK_SIZE/2);
 }
 
-
 function spawnPiece () {
 	var randomPiece = Math.floor(Math.random() * PIECES.length);
 	var newPiece = new Piece( PIECES[randomPiece] );
 	newPiece.x = 5;
 	newPiece.y = 0;
-	return ACTIVE_PIECE = newPiece;
+	return newPiece;
 }
 
 ACTIVE_PIECE = spawnPiece();
 
 window.onkeydown = function(evt) {
-	console.log(evt.which);
+	// console.log(evt.which);
 	switch(evt.which){
 		case KEYS.LEFT:
 			evt.preventDefault();
@@ -133,7 +155,7 @@ window.onkeydown = function(evt) {
 			break;
 		case KEYS.PAUSE:
 			evt.preventDefault();
-			window.clearInterval(GAMELOOP);
+			window.clearInterval(GAME_LOOP);
 			break;
 		case KEYS.NEW:
 			ACTIVE_PIECE = spawnPiece();
@@ -144,8 +166,6 @@ window.onkeydown = function(evt) {
 
 // game loop
 function loop () {
-	// console.log(ACTIVE_PIECE.y);
-	if (ACTIVE_PIECE.y) {}
 	ACTIVE_PIECE.move({y: +1});
 }
-GAMELOOP = window.setInterval(loop, GAMESPEED);
+GAME_LOOP = window.setInterval(loop, GAME_SPEED);
